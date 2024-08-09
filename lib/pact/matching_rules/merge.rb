@@ -83,6 +83,8 @@ module Pact
           handle_match_type(object, path)
         elsif find_rule(path, 'regex')
           handle_regex(object, path)
+        elsif find_rule(path, 'fill_string')
+          handle_provider_param(object, path, rules)
         else
           object
         end
@@ -98,6 +100,11 @@ module Pact
         log_used_rule(path, 'match', 'regex') # assumed to be present
         log_used_rule(path, 'regex', regex)
         Pact::Term.new(generate: object, matcher: Regexp.new(regex))
+      end
+
+      def handle_provider_param object, path, rules
+        log_ignored_rules(path, rules, {'match' => 'provider_param', 'fill_string' => rules['fill_string']})
+        Pact::ProviderParam.new(rules['fill_string'], object)
       end
 
       def log_ignored_rules
