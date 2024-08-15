@@ -13,8 +13,10 @@ describe Pact::MatchingRules::V3::Extract do
 
       let(:rules) do
         {
-          "$.body" => {
-            "matchers" => [ {"match" => "type"} ]
+          "body" => {
+            "$" => {
+              "matchers" => [ {"match" => "type"} ]
+            }
           }
         }
       end
@@ -37,8 +39,10 @@ describe Pact::MatchingRules::V3::Extract do
 
       let(:rules) do
         {
-          "$.body.alligator.name" => {
-            "matchers" => [ {"match" => "regex", "regex" => ".*a"} ]
+          "body" => {
+            "$.alligator.name" => {
+              "matchers" => [ {"match" => "regex", "regex" => ".*a"} ]
+            }
           }
         }
       end
@@ -60,12 +64,14 @@ describe Pact::MatchingRules::V3::Extract do
 
       let(:rules) do
         {
-          "$.body" => {
-            "matchers" => [ {"match" => "type"} ]
-          },
-          "$.body.alligator.name" => {
-            "matchers" => [ {"match" => "regex", "regex"=>".*a"} ]
-          },
+          "body" => {
+            "$" => {
+              "matchers" => [ {"match" => "type"} ]
+            },
+            "$.alligator.name" => {
+              "matchers" => [ {"match" => "regex", "regex"=>".*a"} ]
+            },
+          }
         }
       end
 
@@ -88,8 +94,10 @@ describe Pact::MatchingRules::V3::Extract do
 
       let(:rules) do
         {
-          "$.body" => {
-            "matchers" => [ {"match" => "type"} ]
+          "body" => {
+            "$" => {
+              "matchers" => [ {"match" => "type"} ]
+            }
           }
         }
       end
@@ -112,11 +120,13 @@ describe Pact::MatchingRules::V3::Extract do
 
       let(:rules) do
         {
-          "$.body.alligators" => {
-            "matchers" => [ {"min" => 1} ]
-          },
-          "$.body.alligators[*].*" => {
-            "matchers" => [ {"match" => "type"} ]
+          "body" => {
+            "$.alligators" => {
+              "matchers" => [ {"min" => 1} ]
+            },
+            "$.alligators[*].*" => {
+              "matchers" => [ {"match" => "type"} ]
+            }
           }
         }
       end
@@ -140,14 +150,16 @@ describe Pact::MatchingRules::V3::Extract do
 
       let(:rules) do
         {
-          "$.body.alligators" => {
-            "matchers" => [ {"min" => 1} ]
-          },
-          "$.body.alligators[*].*" => {
-            "matchers" => [ {"match" => "type"} ]
-          },
-          "$.body.alligators[*].phoneNumber" => {
-            "matchers" => [ {"match" => "regex", "regex" => "\\d+"} ]
+          "body" => {
+            "$.alligators" => {
+              "matchers" => [ {"min" => 1} ]
+            },
+            "$.alligators[*].*" => {
+              "matchers" => [ {"match" => "type"} ]
+            },
+            "$.alligators[*].phoneNumber" => {
+              "matchers" => [ {"match" => "regex", "regex" => "\\d+"} ]
+            }
           }
         }
       end
@@ -166,8 +178,10 @@ describe Pact::MatchingRules::V3::Extract do
 
       let(:rules) do
         {
-          "$.query" => {
-            "matchers" => [ {"match" => "regex", "regex" => "foo"} ]
+          "query" => {
+            "foobar" => {
+              "matchers" => [ {"match" => "regex", "regex" => "foo"} ]
+            }
           }
         }
       end
@@ -186,8 +200,10 @@ describe Pact::MatchingRules::V3::Extract do
 
       let(:rules) do
         {
-          "$.query.bar[0]" => {
-            "matchers" => [ {"match" => "regex", "regex" => "foo"} ]
+          "query" => {
+            "bar" => {
+              "matchers" => [ {"match" => "regex", "regex" => "foo"} ]
+            }
           }
         }
       end
@@ -216,14 +232,16 @@ describe Pact::MatchingRules::V3::Extract do
     context "with a key containing a dot" do
       let(:matchable) do
         {
-          "key" => {
-            "key.with.dots" => Pact::SomethingLike.new("foo")
+          "body" => {
+            "key" => {
+              "key.with.dots" => Pact::SomethingLike.new("foo")
+            }
           }
         }
       end
 
       it "uses square brackets notation for the key with dots" do
-        expect(subject.keys).to include "$.key['key.with.dots']"
+        expect(subject["body"]).to include "$.key['key.with.dots']"
       end
     end
   end

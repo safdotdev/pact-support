@@ -59,21 +59,81 @@ module Pact
         recurse array_like.contents, "#{path}[*]", :array_like
       end
 
-      def record_rule path, rule
-        rules[path] ||= {}
-        rules[path]['matchers'] ||= []
-        rules[path]['matchers'] << rule
+      def record_rule(path, rule)
+        if path.include?('$.body')
+          path = path.gsub('$.body', '$')
+          key = 'body'
+          rules[key] ||= {}
+          rules[key][path] ||= {}
+          rules[key][path]['matchers'] ||= []
+          rules[key][path]['matchers'] << rule
+        elsif path.include?('$.query')
+          # puts path
+          path = path.gsub('$.query', '$')
+          path = term.generate if path.empty?
+          key = 'query'
+          rules[key] ||= {}
+          rules[key][path] ||= {}
+          rules[key][path]['matchers'] ||= []
+          rules[key][path]['matchers'] << rule
+        else
+          rules[path] ||= {}
+          rules[path]['matchers'] ||= []
+          rules[path]['matchers'] << rule
+        end
       end
 
-      def record_regex_rule term, path
-        rules[path] ||= {}
-        rules[path]['matchers'] ||= []
-        rule = { 'match' => 'regex', 'regex' => term.matcher.inspect[1..-2]}
-        rules[path]['matchers'] << rule
+      def record_regex_rule(term, path)
+        if path.include?('$.body')
+          path = path.gsub('$.body', '$')
+          key = 'body'
+          rules[key] ||= {}
+          rules[key][path] ||= {}
+          rules[key][path]['matchers'] ||= []
+          rule = { 'match' => 'regex', 'regex' => term.matcher.inspect[1..-2] }
+          rules[key][path]['matchers'] << rule
+        elsif path.include?('$.query')
+          path = path.gsub('$.query', '')
+          puts path
+          if path.empty?
+            path = term.generate
+          elsif path.match?(/.*\[\d+\]/)
+            path = path.match(/\.([^.\[\]]+)\[/)[1]
+          end
+          key = 'query'
+          rules[key] ||= {}
+          rules[key][path] ||= {}
+          rules[key][path]['matchers'] ||= []
+          rule = { 'match' => 'regex', 'regex' => term.matcher.inspect[1..-2] }
+          rules[key][path]['matchers'] << rule
+        else
+          rules[path] ||= {}
+          rules[path]['matchers'] ||= []
+          rule = { 'match' => 'regex', 'regex' => term.matcher.inspect[1..-2] }
+          rules[path]['matchers'] << rule
+        end
       end
 
-      def record_match_type_rule path, match_type
-        unless match_type == :array_like || match_type.nil?
+      def record_match_type_rule(path, match_type)
+        return if match_type == :array_like || match_type.nil?
+
+        if path.include?('$.body')
+          path = path.gsub('$.body', '$')
+          key = 'body'
+          rules[key] ||= {}
+          rules[key][path] ||= {}
+          rules[key][path]['matchers'] ||= []
+          rules[key][path]['matchers'] << { 'match' => match_type }
+        elsif path.include?('$.query')
+          path = path.gsub('$.query', '$')
+          path = term.generate if path.empty?
+          key = 'query'
+
+          rules[key] ||= {}
+          rules[key][path] ||= {}
+          rules[key][path]['matchers'] ||= []
+          rules[key][path]['matchers'] << { 'match' => match_type }
+        else
           rules[path] ||= {}
           rules[path]['matchers'] ||= []
           rules[path]['matchers'] << { 'match' => match_type }
